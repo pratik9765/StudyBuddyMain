@@ -289,3 +289,17 @@ exports.changePassword = async (req, res) => {
     })
   }
 }
+
+
+
+
+
+
+
+// if (!email || !password) {
+//   // Return 400 Bad Request status code with error message
+//   return res.status(400).json({
+//     success: false,
+//     message: `Please Fill up All the Required Fields`,
+//   })
+// }
