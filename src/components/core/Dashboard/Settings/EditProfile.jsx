@@ -31,12 +31,12 @@ export default function EditProfile() {
     <>
       <form onSubmit={handleSubmit(submitProfileForm)}>
         {/* Profile Information */}
-        <div className="my-10 flex flex-col gap-y-6 rounded-md border-[1px] border-richblack-700 bg-richblack-800 p-8 px-12">
+        <div className="form-card my-8 flex flex-col gap-y-6 sm:my-10">
           <h2 className="text-lg font-semibold text-richblack-5">
             Profile Information
           </h2>
-          <div className="flex flex-col gap-5 lg:flex-row">
-            <div className="flex flex-col gap-2 lg:w-[48%]">
+          <div className="form-row">
+            <div className="form-field">
               <label htmlFor="firstName" className="lable-style">
                 First Name
               </label>
@@ -55,7 +55,7 @@ export default function EditProfile() {
                 </span>
               )}
             </div>
-            <div className="flex flex-col gap-2 lg:w-[48%]">
+            <div className="form-field">
               <label htmlFor="lastName" className="lable-style">
                 Last Name
               </label>
@@ -76,8 +76,8 @@ export default function EditProfile() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-5 lg:flex-row">
-            <div className="flex flex-col gap-2 lg:w-[48%]">
+          <div className="form-row">
+            <div className="form-field">
               <label htmlFor="dateOfBirth" className="lable-style">
                 Date of Birth
               </label>
@@ -104,7 +104,7 @@ export default function EditProfile() {
                 </span>
               )}
             </div>
-            <div className="flex flex-col gap-2 lg:w-[48%]">
+            <div className="form-field">
               <label htmlFor="gender" className="lable-style">
                 Gender
               </label>
@@ -132,8 +132,8 @@ export default function EditProfile() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-5 lg:flex-row">
-            <div className="flex flex-col gap-2 lg:w-[48%]">
+          <div className="form-row">
+            <div className="form-field">
               <label htmlFor="contactNumber" className="lable-style">
                 Contact Number
               </label>
@@ -159,7 +159,7 @@ export default function EditProfile() {
                 </span>
               )}
             </div>
-            <div className="flex flex-col gap-2 lg:w-[48%]">
+            <div className="form-field">
               <label htmlFor="about" className="lable-style">
                 About
               </label>

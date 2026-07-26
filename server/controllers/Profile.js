@@ -68,7 +68,7 @@ exports.deleteAccount = async (req, res) => {
         message: "User not found",
       })
     }
-    // Delete Assosiated Profile with the User
+    // Delete Associated Profile with the User
     await Profile.findByIdAndDelete({
       _id: new mongoose.Types.ObjectId(user.additionalDetails),
     })
@@ -79,13 +79,13 @@ exports.deleteAccount = async (req, res) => {
         { new: true }
       )
     }
-    // Now Delete User
+    await CourseProgress.deleteMany({ userId: id })
+    // Now delete user
     await User.findByIdAndDelete({ _id: id })
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "User deleted successfully",
     })
-    await CourseProgress.deleteMany({ userId: id })
   } catch (error) {
     console.log(error)
     res
@@ -159,6 +159,13 @@ exports.getEnrolledCourses = async (req, res) => {
         },
       })
       .exec()
+    if (!userDetails) {
+      return res.status(400).json({
+        success: false,
+        message: `Could not find user with id: ${userId}`,
+      })
+    }
+
     userDetails = userDetails.toObject()
     var SubsectionLength = 0
     for (var i = 0; i < userDetails.courses.length; i++) {
@@ -178,7 +185,7 @@ exports.getEnrolledCourses = async (req, res) => {
         courseID: userDetails.courses[i]._id,
         userId: userId,
       })
-      courseProgressCount = courseProgressCount?.completedVideos.length
+      const completedVideos = courseProgressCount?.completedVideos?.length || 0
       if (SubsectionLength === 0) {
         userDetails.courses[i].progressPercentage = 100
       } else {
@@ -186,7 +193,7 @@ exports.getEnrolledCourses = async (req, res) => {
         const multiplier = Math.pow(10, 2)
         userDetails.courses[i].progressPercentage =
           Math.round(
-            (courseProgressCount / SubsectionLength) * 100 * multiplier
+            (completedVideos / SubsectionLength) * 100 * multiplier
           ) / multiplier
       }
     }

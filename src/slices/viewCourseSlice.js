@@ -21,10 +21,13 @@ const viewCourseSlice = createSlice({
       state.totalNoOfLectures = action.payload
     },
     setCompletedLectures: (state, action) => {
-      state.completedLectures = action.payload
+      state.completedLectures = [...new Set((action.payload || []).map(String))]
     },
     updateCompletedLectures: (state, action) => {
-      state.completedLectures = [...state.completedLectures, action.payload]
+      const lectureId = String(action.payload)
+      if (!state.completedLectures.map(String).includes(lectureId)) {
+        state.completedLectures.push(lectureId)
+      }
     },
   },
 })

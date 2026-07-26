@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 const Section = require("../models/Section")
-const SubSection = require("../models/Subsection")
+const SubSection = require("../models/SubSection")
 const CourseProgress = require("../models/CourseProgress")
 const Course = require("../models/Course")
 
@@ -9,38 +9,74 @@ exports.updateCourseProgress = async (req, res) => {
   const userId = req.user.id
 
   try {
-    // Check if the subsection is valid
+    // Validate course and subsection
     const subsection = await SubSection.findById(subsectionId)
     if (!subsection) {
       return res.status(404).json({ error: "Invalid subsection" })
     }
 
-    // Find the course progress document for the user and course
+    const course = await Course.findById(courseId)
+    if (!course) {
+      return res.status(404).json({ error: "Invalid course" })
+    }
+
+    const isEnrolled = course.studentsEnroled.some(
+      (studentId) => studentId.toString() === userId
+    )
+    if (!isEnrolled) {
+      return res.status(403).json({
+        success: false,
+        message: "User is not enrolled in this course",
+      })
+    }
+
+    const sections = await Section.find({
+      _id: { $in: course.courseContent },
+      subSection: subsectionId,
+    }).select("_id")
+    if (sections.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "This lesson does not belong to the selected course",
+      })
+    }
+
+    // Find or create course progress document for the user and course
     let courseProgress = await CourseProgress.findOne({
       courseID: courseId,
       userId: userId,
     })
 
     if (!courseProgress) {
-      // If course progress doesn't exist, create a new one
-      return res.status(404).json({
-        success: false,
-        message: "Course progress Does Not Exist",
+      courseProgress = await CourseProgress.create({
+        courseID: courseId,
+        userId: userId,
+        completedVideos: [],
       })
-    } else {
-      // If course progress exists, check if the subsection is already completed
-      if (courseProgress.completedVideos.includes(subsectionId)) {
-        return res.status(400).json({ error: "Subsection already completed" })
-      }
-
-      // Push the subsection into the completedVideos array
-      courseProgress.completedVideos.push(subsectionId)
     }
 
-    // Save the updated course progress
-    await courseProgress.save()
+    const alreadyCompleted = courseProgress.completedVideos.some(
+      (completedId) => completedId.toString() === subsectionId
+    )
+    if (alreadyCompleted) {
+      return res.status(200).json({
+        success: true,
+        message: "Lecture already completed",
+        completedVideos: courseProgress.completedVideos,
+      })
+    }
 
-    return res.status(200).json({ message: "Course progress updated" })
+    courseProgress = await CourseProgress.findOneAndUpdate(
+      { courseID: courseId, userId },
+      { $addToSet: { completedVideos: subsectionId } },
+      { new: true }
+    )
+
+    return res.status(200).json({
+      success: true,
+      message: "Course progress updated",
+      completedVideos: courseProgress.completedVideos,
+    })
   } catch (error) {
     console.error(error)
     return res.status(500).json({ error: "Internal server error" })

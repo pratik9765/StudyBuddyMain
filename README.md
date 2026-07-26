@@ -1,31 +1,58 @@
-# React & Tailwind CSS Starter Pack
+# StudyBuddy
 
-This is a starter pack for creating React projects with Tailwind CSS configured. It uses React version **18.2** and Tailwind CSS version **3.2**.
+StudyBuddy is a full-stack learning platform for students, instructors, and
+administrators. It includes authentication, course authoring, video lessons,
+progress tracking, ratings, payments, profile management, and contact email.
 
-## Usage
+## Tech stack
 
-This starter pack includes a basic setup for using **Tailwind CSS with React**. To start building your own components and styles, follow these steps:
+- React 18, Redux Toolkit, React Router, and Tailwind CSS
+- Node.js, Express, MongoDB, and Mongoose
+- Cloudinary for media, Razorpay for payments, and SMTP for email
 
-1. Clone the repository to your local machine.
-    ```sh
-    git clone https://github.com/thepranaygupta/react-tailwind-css-starter-pack.git
-    ```
+## Local setup
 
-1. Install the required packages.
-    ```sh
-    cd react-tailwind-css-starter-pack
-    npm install
-    ```
+Requirements: Node.js 18 or newer and MongoDB.
 
-1. Start the development server.
-    ```sh
-    npm start
-    ```
-1. Open the project in your browser at [`http://localhost:3000`](http://localhost:3000) to view your project.
-1. Create your React components and add your styles using Tailwind classes. You can also create new CSS files and import them into your components.
+1. Install both dependency sets:
 
-The project is set up to use `postcss-cli` to process your CSS files. You can add your own `tailwind.config.js` file to customize your Tailwind setup.
+   ```sh
+   npm ci
+   npm ci --prefix server
+   ```
 
-## Contributing
+2. Copy `.env.example` to `.env` and `server/.env.example` to `server/.env`.
+   Replace every placeholder with the appropriate local or provider value.
 
-Contributions are welcome! If you have any suggestions or find any issues, please feel free to open an issue or a pull request.
+3. Start the client and API together:
+
+   ```sh
+   npm run dev
+   ```
+
+The client runs at `http://localhost:3000`; the API defaults to
+`http://localhost:4000/api/v1`.
+
+## Commands
+
+```sh
+npm start             # frontend development server
+npm run server        # backend development server
+npm run dev           # frontend and backend together
+npm run build         # optimized frontend build
+npm start --prefix server
+```
+
+## Configuration notes
+
+- Frontend variables must begin with `REACT_APP_`.
+- `CLIENT_URL` controls the API CORS allow-list.
+- `FRONTEND_URL` is used in password-reset links.
+- Never commit either real `.env` file.
+
+## Production
+
+Run `npm run build`, serve the generated `build/` directory from a static host,
+and deploy `server/` as a Node service. Configure all production environment
+variables on the hosting providers and use HTTPS URLs for `CLIENT_URL`,
+`FRONTEND_URL`, and `REACT_APP_BASE_URL`.

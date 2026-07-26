@@ -1,6 +1,8 @@
 const Section = require("../models/Section")
 const Course = require("../models/Course")
-const SubSection = require("../models/Subsection")
+const SubSection = require("../models/SubSection")
+const getOwnedCourse = (courseId, instructorId) =>
+  Course.findOne({ _id: courseId, instructor: instructorId })
 // CREATE a new section
 exports.createSection = async (req, res) => {
   try {
@@ -12,6 +14,13 @@ exports.createSection = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Missing required properties",
+      })
+    }
+    const ownedCourse = await getOwnedCourse(courseId, req.user.id)
+    if (!ownedCourse) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to modify this course",
       })
     }
 
@@ -56,6 +65,16 @@ exports.createSection = async (req, res) => {
 exports.updateSection = async (req, res) => {
   try {
     const { sectionName, sectionId, courseId } = req.body
+    const ownedCourse = await getOwnedCourse(courseId, req.user.id)
+    if (
+      !ownedCourse ||
+      !ownedCourse.courseContent.some((id) => id.toString() === sectionId)
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to modify this section",
+      })
+    }
     const section = await Section.findByIdAndUpdate(
       sectionId,
       { sectionName },
@@ -89,6 +108,16 @@ exports.updateSection = async (req, res) => {
 exports.deleteSection = async (req, res) => {
   try {
     const { sectionId, courseId } = req.body
+    const ownedCourse = await getOwnedCourse(courseId, req.user.id)
+    if (
+      !ownedCourse ||
+      !ownedCourse.courseContent.some((id) => id.toString() === sectionId)
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to delete this section",
+      })
+    }
     await Course.findByIdAndUpdate(courseId, {
       $pull: {
         courseContent: sectionId,

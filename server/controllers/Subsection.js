@@ -1,20 +1,37 @@
 // Import necessary modules
 const Section = require("../models/Section")
-const SubSection = require("../models/Subsection")
+const SubSection = require("../models/SubSection")
+const Course = require("../models/Course")
 const { uploadImageToCloudinary } = require("../utils/imageUploader")
+
+const getOwnedSection = async (sectionId, instructorId) => {
+  const course = await Course.findOne({
+    instructor: instructorId,
+    courseContent: sectionId,
+  })
+  if (!course) return null
+  return Section.findById(sectionId)
+}
 
 // Create a new sub-section for a given section
 exports.createSubSection = async (req, res) => {
   try {
     // Extract necessary information from the request body
     const { sectionId, title, description } = req.body
-    const video = req.files.video
+    const video = req.files?.video
 
     // Check if all necessary fields are provided
     if (!sectionId || !title || !description || !video) {
       return res
         .status(404)
         .json({ success: false, message: "All Fields are Required" })
+    }
+    const section = await getOwnedSection(sectionId, req.user.id)
+    if (!section) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to modify this section",
+      })
     }
     console.log(video)
 
@@ -55,6 +72,16 @@ exports.createSubSection = async (req, res) => {
 exports.updateSubSection = async (req, res) => {
   try {
     const { sectionId, subSectionId, title, description } = req.body
+    const section = await getOwnedSection(sectionId, req.user.id)
+    if (
+      !section ||
+      !section.subSection.some((id) => id.toString() === subSectionId)
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to modify this subsection",
+      })
+    }
     const subSection = await SubSection.findById(subSectionId)
 
     if (!subSection) {
@@ -107,6 +134,16 @@ exports.updateSubSection = async (req, res) => {
 exports.deleteSubSection = async (req, res) => {
   try {
     const { subSectionId, sectionId } = req.body
+    const section = await getOwnedSection(sectionId, req.user.id)
+    if (
+      !section ||
+      !section.subSection.some((id) => id.toString() === subSectionId)
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to delete this subsection",
+      })
+    }
     await Section.findByIdAndUpdate(
       { _id: sectionId },
       {

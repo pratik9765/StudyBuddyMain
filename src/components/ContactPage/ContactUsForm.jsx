@@ -45,11 +45,11 @@ const ContactUsForm = () => {
 
   return (
     <form
-      className="flex flex-col gap-7"
+      className="flex w-full flex-col gap-6"
       onSubmit={handleSubmit(submitContactForm)}
     >
-      <div className="flex flex-col gap-5 lg:flex-row">
-        <div className="flex flex-col gap-2 lg:w-[48%]">
+      <div className="form-row">
+        <div className="form-field">
           <label htmlFor="firstname" className="lable-style">
             First Name
           </label>
@@ -67,7 +67,7 @@ const ContactUsForm = () => {
             </span>
           )}
         </div>
-        <div className="flex flex-col gap-2 lg:w-[48%]">
+        <div className="form-field">
           <label htmlFor="lastname" className="lable-style">
             Last Name
           </label>
@@ -82,7 +82,7 @@ const ContactUsForm = () => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="form-field">
         <label htmlFor="email" className="lable-style">
           Email Address
         </label>
@@ -101,18 +101,17 @@ const ContactUsForm = () => {
         )}
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="form-field">
         <label htmlFor="phonenumber" className="lable-style">
           Phone Number
         </label>
 
-        <div className="flex gap-5">
-          <div className="flex w-[81px] flex-col gap-2">
+        <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3 sm:grid-cols-[140px_minmax(0,1fr)]">
+          <div className="min-w-0">
             <select
               type="text"
-              name="firstname"
-              id="firstname"
-              placeholder="Enter first name"
+              name="countrycode"
+              id="countrycode"
               className="form-style"
               {...register("countrycode", { required: true })}
             >
@@ -125,7 +124,7 @@ const ContactUsForm = () => {
               })}
             </select>
           </div>
-          <div className="flex w-[calc(100%-90px)] flex-col gap-2">
+          <div className="min-w-0">
             <input
               type="number"
               name="phonenumber"
@@ -150,7 +149,7 @@ const ContactUsForm = () => {
         )}
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="form-field">
         <label htmlFor="message" className="lable-style">
           Message
         </label>

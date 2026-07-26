@@ -1,7 +1,7 @@
 const Course = require("../models/Course")
 const Category = require("../models/Category")
 const Section = require("../models/Section")
-const SubSection = require("../models/Subsection")
+const SubSection = require("../models/SubSection")
 const User = require("../models/User")
 const { uploadImageToCloudinary } = require("../utils/imageUploader")
 const CourseProgress = require("../models/CourseProgress")
@@ -53,14 +53,12 @@ exports.createCourse = async (req, res) => {
       status = "Draft"
     }
     // Check if the user is an instructor
-    const instructorDetails = await User.findById(userId, {
-      accountType: "Instructor",
-    })
+    const instructorDetails = await User.findById(userId)
 
-    if (!instructorDetails) {
-      return res.status(404).json({
+    if (!instructorDetails || instructorDetails.accountType !== "Instructor") {
+      return res.status(403).json({
         success: false,
-        message: "Instructor Details Not Found",
+        message: "Only instructors can create courses",
       })
     }
 
@@ -141,6 +139,12 @@ exports.editCourse = async (req, res) => {
     if (!course) {
       return res.status(404).json({ error: "Course not found" })
     }
+    if (course.instructor.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to edit this course",
+      })
+    }
 
     // If Thumbnail Image is found, update it
     if (req.files) {
@@ -154,7 +158,18 @@ exports.editCourse = async (req, res) => {
     }
 
     // Update only the fields that are present in the request body
+    const allowedFields = new Set([
+      "courseName",
+      "courseDescription",
+      "whatYouWillLearn",
+      "price",
+      "tag",
+      "category",
+      "status",
+      "instructions",
+    ])
     for (const key in updates) {
+      if (!allowedFields.has(key)) continue
       if (updates.hasOwnProperty(key)) {
         if (key === "tag" || key === "instructions") {
           course[key] = JSON.parse(updates[key])
@@ -210,7 +225,7 @@ exports.getAllCourses = async (req, res) => {
         thumbnail: true,
         instructor: true,
         ratingAndReviews: true,
-        studentsEnrolled: true,
+        studentsEnroled: true,
       }
     )
       .populate("instructor")
@@ -346,6 +361,16 @@ exports.getFullCourseDetails = async (req, res) => {
   try {
     const { courseId } = req.body
     const userId = req.user.id
+    const enrollment = await Course.exists({
+      _id: courseId,
+      studentsEnroled: userId,
+    })
+    if (!enrollment) {
+      return res.status(403).json({
+        success: false,
+        message: "You must be enrolled to access this course.",
+      })
+    }
     const courseDetails = await Course.findOne({
       _id: courseId,
     })
@@ -448,6 +473,13 @@ exports.deleteCourse = async (req, res) => {
     const course = await Course.findById(courseId)
     if (!course) {
       return res.status(404).json({ message: "Course not found" })
+    }
+
+    if (course.instructor.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to delete this course",
+      })
     }
 
     // Unenroll students from the course
